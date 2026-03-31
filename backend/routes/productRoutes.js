@@ -1,4 +1,5 @@
 const express = require("express");
+const mongoose = require("mongoose");
 const Product = require("../models/productModel");
 
 const router = express.Router();
@@ -9,22 +10,45 @@ const router = express.Router();
 router.post("/", async (req, res) => {
   try {
     const product = new Product(req.body);
-    await product.save();
-    res.status(201).json(product);
+    const savedProduct = await product.save();
+
+    res.status(201).json({
+      success: true,
+      data: savedProduct,
+    });
   } catch (error) {
-    res.status(500).json({ message: "Failed to create product" });
+    res.status(500).json({
+      success: false,
+      message: "Failed to create product",
+      error: error.message,
+    });
   }
 });
 
 /* ============================
-   GET ALL PRODUCTS
+   GET ALL PRODUCTS (WITH FILTER)
 ============================ */
 router.get("/", async (req, res) => {
   try {
-    const products = await Product.find().sort({ createdAt: -1 });
-    res.json(products);
+    const { gender, category } = req.query;
+
+    let filter = {};
+    if (gender) filter.gender = gender;
+    if (category) filter.category = category;
+
+    const products = await Product.find(filter).sort({ createdAt: -1 });
+
+    res.json({
+      success: true,
+      count: products.length,
+      data: products,
+    });
   } catch (error) {
-    res.status(500).json({ message: "Failed to fetch products" });
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch products",
+      error: error.message,
+    });
   }
 });
 
@@ -33,15 +57,35 @@ router.get("/", async (req, res) => {
 ============================ */
 router.get("/:id", async (req, res) => {
   try {
-    const product = await Product.findById(req.params.id);
+    const { id } = req.params;
 
-    if (!product) {
-      return res.status(404).json({ message: "Product not found" });
+    // ✅ Validate Mongo ID
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid product ID",
+      });
     }
 
-    res.json(product);
+    const product = await Product.findById(id);
+
+    if (!product) {
+      return res.status(404).json({
+        success: false,
+        message: "Product not found",
+      });
+    }
+
+    res.json({
+      success: true,
+      data: product,
+    });
   } catch (error) {
-    res.status(500).json({ message: "Failed to fetch product" });
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch product",
+      error: error.message,
+    });
   }
 });
 
@@ -50,17 +94,37 @@ router.get("/:id", async (req, res) => {
 ============================ */
 router.put("/:id", async (req, res) => {
   try {
-    const updated = await Product.findByIdAndUpdate(req.params.id, req.body, {
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid product ID",
+      });
+    }
+
+    const updated = await Product.findByIdAndUpdate(id, req.body, {
       new: true,
+      runValidators: true,
     });
 
     if (!updated) {
-      return res.status(404).json({ message: "Product not found" });
+      return res.status(404).json({
+        success: false,
+        message: "Product not found",
+      });
     }
 
-    res.json(updated);
+    res.json({
+      success: true,
+      data: updated,
+    });
   } catch (error) {
-    res.status(500).json({ message: "Failed to update product" });
+    res.status(500).json({
+      success: false,
+      message: "Failed to update product",
+      error: error.message,
+    });
   }
 });
 
@@ -69,15 +133,34 @@ router.put("/:id", async (req, res) => {
 ============================ */
 router.delete("/:id", async (req, res) => {
   try {
-    const deleted = await Product.findByIdAndDelete(req.params.id);
+    const { id } = req.params;
 
-    if (!deleted) {
-      return res.status(404).json({ message: "Product not found" });
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid product ID",
+      });
     }
 
-    res.json({ message: "Product deleted" });
+    const deleted = await Product.findByIdAndDelete(id);
+
+    if (!deleted) {
+      return res.status(404).json({
+        success: false,
+        message: "Product not found",
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "Product deleted successfully",
+    });
   } catch (error) {
-    res.status(500).json({ message: "Failed to delete product" });
+    res.status(500).json({
+      success: false,
+      message: "Failed to delete product",
+      error: error.message,
+    });
   }
 });
 
