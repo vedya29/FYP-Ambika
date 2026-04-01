@@ -15,7 +15,6 @@ function Login() {
   const [error, setError] = useState("");
 
   const from = location.state?.from || "/dashboard";
-  navigate(from, { replace: true });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -59,11 +58,12 @@ function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#f8f4f0]">
-      <div className="bg-white p-8 rounded-xl shadow-lg w-full max-w-md relative">
+    <div className="min-h-screen bg-[#f8f4f0] flex items-center justify-center px-4 relative z-10">
+      <div className="bg-white p-8 rounded-2xl shadow-lg w-full max-w-md relative border border-[#eee4d8]">
         <button
+          type="button"
           onClick={() => navigate("/")}
-          className="absolute top-3 right-3"
+          className="absolute top-3 right-3 z-20"
         >
           <X />
         </button>
@@ -76,14 +76,14 @@ function Login() {
           <div className="mb-4 text-red-600 text-center text-sm">{error}</div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4 relative z-10">
           <input
             type="email"
             placeholder="Email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className="w-full border px-4 py-2 rounded"
+            className="w-full border px-4 py-3 rounded-xl outline-none focus:ring-2 focus:ring-[#c8a27e]"
           />
 
           <input
@@ -92,10 +92,13 @@ function Login() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            className="w-full border px-4 py-2 rounded"
+            className="w-full border px-4 py-3 rounded-xl outline-none focus:ring-2 focus:ring-[#c8a27e]"
           />
 
-          <button className="w-full bg-[#c8a27e] text-white py-2 rounded">
+          <button
+            type="submit"
+            className="w-full bg-[#c8a27e] text-white py-3 rounded-xl hover:opacity-90"
+          >
             Login
           </button>
         </form>
