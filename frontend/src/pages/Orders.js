@@ -43,8 +43,8 @@ function Orders() {
           My Orders 📦
         </h2>
         <p className="text-gray-700 text-base md:text-lg leading-7 max-w-3xl">
-          Review your recent purchases, order details, and shipping information
-          in one place.
+          Review your recent purchases, payment details, and shipping
+          information in one place.
         </p>
       </section>
 
@@ -64,9 +64,14 @@ function Orders() {
                 </p>
               </div>
 
-              <span className="inline-flex w-fit px-4 py-2 rounded-full bg-[#f5e8dc] text-[#8a6d4b] text-sm font-medium">
-                {order.status}
-              </span>
+              <div className="flex flex-wrap gap-2">
+                <span className="inline-flex w-fit px-4 py-2 rounded-full bg-[#f5e8dc] text-[#8a6d4b] text-sm font-medium">
+                  {order.status}
+                </span>
+                <span className="inline-flex w-fit px-4 py-2 rounded-full bg-[#eef8ee] text-green-700 text-sm font-medium">
+                  {order.paymentStatus || "Pending"}
+                </span>
+              </div>
             </div>
 
             <div className="grid md:grid-cols-2 gap-8">
@@ -116,6 +121,9 @@ function Orders() {
                     Payment
                   </h4>
                   <p className="text-gray-600">{order.paymentMethod}</p>
+                  <p className="text-gray-600">
+                    Status: {order.paymentStatus || "Pending"}
+                  </p>
                 </div>
 
                 <div>

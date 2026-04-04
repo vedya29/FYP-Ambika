@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 
 export default function Checkout() {
-  const { cart, clearCart, user } = useCart();
+  const { cart, user, clearCart } = useCart();
   const navigate = useNavigate();
 
   const [fullName, setFullName] = useState(user?.fullName || user?.name || "");
@@ -13,28 +13,31 @@ export default function Checkout() {
   const [city, setCity] = useState(user?.city || "");
   const [country, setCountry] = useState(user?.country || "");
   const [paymentMethod, setPaymentMethod] = useState("Cash on Delivery");
+  const [processing, setProcessing] = useState(false);
 
   const subtotal = useMemo(
-    () => cart.reduce((s, item) => s + item.price * item.qty, 0),
+    () => cart.reduce((s, item) => s + Number(item.price) * item.qty, 0),
     [cart]
   );
-  const shipping = cart.length > 0 ? 0 : 0;
+  const shipping = 0;
   const total = subtotal + shipping;
 
-  const handlePlaceOrder = (e) => {
-    e.preventDefault();
-
+  const validateForm = () => {
     if (!cart.length) {
       alert("Your cart is empty.");
       navigate("/products");
-      return;
+      return false;
     }
 
     if (!fullName || !email || !phone || !address || !city || !country) {
-      alert("Please fill in all checkout details.");
-      return;
+      alert("Please fill in all shipping details.");
+      return false;
     }
 
+    return true;
+  };
+
+  const saveOrder = (paymentStatusOverride = "Pending") => {
     const existingOrders = JSON.parse(localStorage.getItem("orders")) || [];
 
     const newOrder = {
@@ -49,6 +52,7 @@ export default function Checkout() {
         country,
       },
       paymentMethod,
+      paymentStatus: paymentStatusOverride,
       items: cart,
       totalAmount: total,
       status: "Processing",
@@ -56,9 +60,26 @@ export default function Checkout() {
 
     localStorage.setItem("orders", JSON.stringify([newOrder, ...existingOrders]));
     clearCart();
+  };
 
-    alert("Order placed successfully 🎉");
+  const handleCodOrder = (e) => {
+    e.preventDefault();
+
+    if (!validateForm()) return;
+
+    saveOrder("Pending");
+    alert("Order placed successfully with Cash on Delivery 🎉");
     navigate("/dashboard/orders");
+  };
+
+  const handleKhaltiPayment = (e) => {
+    e.preventDefault();
+
+    if (!validateForm()) return;
+
+    alert(
+      "Khalti is shown as a demo payment option for this FYP. Use Cash on Delivery for the full working order flow."
+    );
   };
 
   if (cart.length === 0) {
@@ -93,15 +114,14 @@ export default function Checkout() {
             Final Step
           </p>
           <h2 className="text-3xl md:text-5xl font-serif text-[#2f2a25] mb-4">
-            Checkout ✨
+            Checkout & Payment ✨
           </h2>
           <p className="text-gray-700 text-base md:text-lg leading-7 max-w-3xl">
-            Fill in your shipping details and confirm your order to complete
-            your shopping experience.
+            Complete your shipping details and choose how you want to pay.
           </p>
         </section>
 
-        <form onSubmit={handlePlaceOrder} className="grid lg:grid-cols-3 gap-8">
+        <form className="grid lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 bg-white rounded-3xl p-6 md:p-8 border border-[#eee4d8] shadow-sm space-y-6">
             <h3 className="text-2xl font-serif text-[#2f2a25]">
               Shipping Details
@@ -164,10 +184,20 @@ export default function Checkout() {
                 className="w-full border border-[#ddd2c5] rounded-2xl px-4 py-3 outline-none focus:ring-2 focus:ring-[#d8b89c]"
               >
                 <option>Cash on Delivery</option>
-                <option>Demo Card Payment</option>
-                <option>Bank Transfer</option>
+                <option>Khalti</option>
               </select>
             </div>
+
+            {paymentMethod === "Khalti" && (
+              <div className="bg-[#fcfaf7] rounded-3xl p-5 border border-[#eee4d8]">
+                <h4 className="text-xl font-serif text-[#2f2a25] mb-2">
+                  Khalti Payment 💜
+                </h4>
+                <p className="text-sm text-gray-600 leading-6">
+                  Khalti is included here as a demo payment option for your FYP.
+                </p>
+              </div>
+            )}
           </div>
 
           <div className="bg-white rounded-3xl p-6 md:p-8 border border-[#eee4d8] shadow-sm h-fit">
@@ -206,7 +236,11 @@ export default function Checkout() {
               </div>
               <div className="flex justify-between">
                 <span>Shipping</span>
-                <span>{shipping === 0 ? "Free" : `$${shipping.toFixed(2)}`}</span>
+                <span>Free</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Payment</span>
+                <span>{paymentMethod}</span>
               </div>
             </div>
 
@@ -214,15 +248,28 @@ export default function Checkout() {
 
             <div className="flex justify-between text-lg font-semibold text-[#2f2a25] mb-6">
               <span>Total</span>
-              <span>${total.toFixed(2)}</span>
+              <span>Rs. {total.toFixed(2)}</span>
             </div>
 
-            <button
-              type="submit"
-              className="w-full px-4 py-3 bg-black text-white rounded-full hover:opacity-90"
-            >
-              Place Order
-            </button>
+            {paymentMethod === "Cash on Delivery" ? (
+              <button
+                type="button"
+                onClick={handleCodOrder}
+                disabled={processing}
+                className="w-full px-4 py-3 bg-black text-white rounded-full hover:opacity-90 disabled:opacity-60"
+              >
+                Place Order
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={handleKhaltiPayment}
+                disabled={processing}
+                className="w-full px-4 py-3 bg-[#5C2D91] text-white rounded-full hover:opacity-90 disabled:opacity-60"
+              >
+                Khalti Demo
+              </button>
+            )}
           </div>
         </form>
       </div>
