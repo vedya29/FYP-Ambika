@@ -7,16 +7,24 @@ export default function Navbar() {
   const { cart, user, setUser } = useCart();
 
   const handleLogout = () => {
-    localStorage.removeItem("user");
-    localStorage.removeItem("token");
-    setUser(null);
-    navigate("/");
-  };
-
+  localStorage.removeItem("user");
+  localStorage.removeItem("token");
+  localStorage.removeItem("role"); 
+  setUser(null);
+  navigate("/");
+};
   const goHome = () => {
-    const storedUser = localStorage.getItem("user");
-    navigate(storedUser ? "/dashboard" : "/");
-  };
+  const role = localStorage.getItem("role");
+  const storedUser = localStorage.getItem("user");
+
+  if (role === "admin") {
+    navigate("/admin/dashboard");
+  } else if (storedUser) {
+    navigate("/dashboard");
+  } else {
+    navigate("/");
+  }
+};
 
   return (
     <nav className="bg-white border-b border-[#eee4d8] sticky top-0 z-50">

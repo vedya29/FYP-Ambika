@@ -28,12 +28,12 @@ function AdminLogin() {
         return;
       }
 
-      // ✅ STORE ADMIN AUTH DATA
+      //  STORE ADMIN AUTH DATA
       localStorage.setItem("token", data.token);
       localStorage.setItem("role", data.role); // must be 'admin'
       localStorage.setItem("admin", JSON.stringify(data.admin || {}));
 
-      // ✅ Redirect to Admin Dashboard
+      //  Redirect to Admin Dashboard
       navigate("/admin/dashboard");
     } catch (err) {
       setError("Server not reachable");

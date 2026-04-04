@@ -4,6 +4,7 @@ import {
   Routes,
   Route,
   useLocation,
+  Navigate,
 } from "react-router-dom";
 
 import Navbar from "./components/Navbar";
@@ -43,8 +44,8 @@ import AdminRegister from "./pages/AdminRegister";
 function AppWrapper() {
   const location = useLocation();
 
-  // Hide navbar on dashboard & admin
   const hideNavbar =
+    location.pathname === "/" ||
     location.pathname.startsWith("/dashboard") ||
     location.pathname.startsWith("/admin");
 
@@ -102,8 +103,9 @@ function AppWrapper() {
         <Route path="/admin/login" element={<AdminLogin />} />
         <Route path="/admin/register" element={<AdminRegister />} />
 
-        {/* ADMIN DASHBOARD (WITH SIDEBAR) */}
+        {/* ADMIN DASHBOARD */}
         <Route path="/admin" element={<AdminLayout />}>
+          <Route index element={<Navigate to="/admin/dashboard" replace />} />
           <Route path="dashboard" element={<AdminDashboard />} />
           <Route path="products" element={<AdminProducts />} />
           <Route path="categories" element={<AdminCategories />} />

@@ -14,6 +14,17 @@ export default function AdminLayout() {
   const navigate = useNavigate();
   const location = useLocation();
 
+  const goHome = () => {
+    navigate("/admin/dashboard");
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("role");
+    localStorage.removeItem("user");
+    navigate("/admin/login");
+  };
+
   const menu = [
     { label: "Dashboard", icon: Home, path: "/admin/dashboard" },
     { label: "Products", icon: Package, path: "/admin/products" },
@@ -25,9 +36,8 @@ export default function AdminLayout() {
 
   return (
     <div style={{ display: "flex", minHeight: "100vh" }}>
-      {/* Sidebar */}
       <aside style={styles.sidebar}>
-        <div style={styles.brand}>
+        <div style={styles.brand} onClick={goHome}>
           AMBIKA <span style={{ color: "#F97316" }}>Admin</span>
         </div>
 
@@ -52,12 +62,11 @@ export default function AdminLayout() {
           );
         })}
 
-        <div style={styles.logout} onClick={() => navigate("/")}>
+        <div style={styles.logout} onClick={handleLogout}>
           <LogOut size={20} /> Logout
         </div>
       </aside>
 
-      {/* Page Content */}
       <main style={{ flex: 1, padding: "24px" }}>
         <Outlet />
       </main>
@@ -78,6 +87,7 @@ const styles = {
     fontSize: "28px",
     fontWeight: "700",
     marginBottom: "16px",
+    cursor: "pointer",
   },
   divider: {
     height: "1px",
