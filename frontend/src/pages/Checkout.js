@@ -22,6 +22,38 @@ export default function Checkout() {
   const shipping = 0;
   const total = subtotal + shipping;
 
+  const generateTransactionUUID = () => {
+    return `AMB-${Date.now()}`;
+  };
+
+  const generateSignature = async (totalAmount, transactionUuid, productCode) => {
+    const secretKey = "8gBm/:&EnhH.1/q";
+    const message = `total_amount=${totalAmount},transaction_uuid=${transactionUuid},product_code=${productCode}`;
+
+    const enc = new TextEncoder();
+    const key = await window.crypto.subtle.importKey(
+      "raw",
+      enc.encode(secretKey),
+      { name: "HMAC", hash: "SHA-256" },
+      false,
+      ["sign"]
+    );
+
+    const signature = await window.crypto.subtle.sign(
+      "HMAC",
+      key,
+      enc.encode(message)
+    );
+
+    const bytes = new Uint8Array(signature);
+    let binary = "";
+    bytes.forEach((b) => {
+      binary += String.fromCharCode(b);
+    });
+
+    return window.btoa(binary);
+  };
+
   const validateForm = () => {
     if (!cart.length) {
       alert("Your cart is empty.");
@@ -37,7 +69,7 @@ export default function Checkout() {
     return true;
   };
 
-  const saveOrder = (paymentStatusOverride = "Pending") => {
+  const saveOrder = (paymentStatusOverride = "Pending", paymentMethodOverride = paymentMethod) => {
     const existingOrders = JSON.parse(localStorage.getItem("orders")) || [];
 
     const newOrder = {
@@ -51,7 +83,7 @@ export default function Checkout() {
         city,
         country,
       },
-      paymentMethod,
+      paymentMethod: paymentMethodOverride,
       paymentStatus: paymentStatusOverride,
       items: cart,
       totalAmount: total,
@@ -67,19 +99,87 @@ export default function Checkout() {
 
     if (!validateForm()) return;
 
-    saveOrder("Pending");
-    alert("Order placed successfully with Cash on Delivery 🎉");
-    navigate("/dashboard/orders");
+    setProcessing(true);
+
+    saveOrder("Pending", "Cash on Delivery");
+
+    setTimeout(() => {
+      setProcessing(false);
+      alert("Order placed successfully with Cash on Delivery 🎉");
+      navigate("/dashboard/orders");
+    }, 500);
   };
 
-  const handleKhaltiPayment = (e) => {
+  const handleEsewaPayment = async (e) => {
     e.preventDefault();
 
     if (!validateForm()) return;
 
-    alert(
-      "Khalti is shown as a demo payment option for this FYP. Use Cash on Delivery for the full working order flow."
-    );
+    try {
+      setProcessing(true);
+
+      const transactionUuid = generateTransactionUUID();
+      const productCode = "EPAYTEST";
+      const totalAmount = total.toFixed(2);
+      const signature = await generateSignature(
+        totalAmount,
+        transactionUuid,
+        productCode
+      );
+
+      const pendingOrder = {
+        id: transactionUuid,
+        createdAt: new Date().toISOString(),
+        customer: {
+          fullName,
+          email,
+          phone,
+          address,
+          city,
+          country,
+        },
+        paymentMethod: "eSewa",
+        paymentStatus: "Pending Verification",
+        items: cart,
+        totalAmount: total,
+        status: "Processing",
+      };
+
+      localStorage.setItem("pendingEsewaOrder", JSON.stringify(pendingOrder));
+
+      const form = document.createElement("form");
+      form.method = "POST";
+      form.action = "https://rc-epay.esewa.com.np/api/epay/main/v2/form";
+
+      const fields = {
+        amount: subtotal.toFixed(2),
+        tax_amount: "0",
+        total_amount: totalAmount,
+        transaction_uuid: transactionUuid,
+        product_code: productCode,
+        product_service_charge: "0",
+        product_delivery_charge: "0",
+        success_url: "http://localhost:3000/payment-success",
+        failure_url: "http://localhost:3000/payment-failure",
+        signed_field_names: "total_amount,transaction_uuid,product_code",
+        signature: signature,
+      };
+
+      Object.entries(fields).forEach(([key, value]) => {
+        const input = document.createElement("input");
+        input.type = "hidden";
+        input.name = key;
+        input.value = value;
+        form.appendChild(input);
+      });
+
+      document.body.appendChild(form);
+      form.submit();
+    } catch (error) {
+      console.error("eSewa payment error:", error);
+      setProcessing(false);
+      alert("Failed to start eSewa payment.");
+    }
   };
 
   if (cart.length === 0) {
@@ -184,17 +284,20 @@ export default function Checkout() {
                 className="w-full border border-[#ddd2c5] rounded-2xl px-4 py-3 outline-none focus:ring-2 focus:ring-[#d8b89c]"
               >
                 <option>Cash on Delivery</option>
-                <option>Khalti</option>
+                <option>eSewa</option>
               </select>
             </div>
 
-            {paymentMethod === "Khalti" && (
-              <div className="bg-[#fcfaf7] rounded-3xl p-5 border border-[#eee4d8]">
+            {paymentMethod === "eSewa" && (
+              <div className="bg-[#f6fff6] rounded-3xl p-5 border border-[#d9f0d9]">
                 <h4 className="text-xl font-serif text-[#2f2a25] mb-2">
-                  Khalti Payment 💜
+                  eSewa Payment 💚
                 </h4>
                 <p className="text-sm text-gray-600 leading-6">
-                  Khalti is included here as a demo payment option for your FYP.
+                  You will be redirected to eSewa sandbox to complete the payment.
+                </p>
+                <p className="text-sm text-gray-500 mt-3">
+                  Test ID: 9806800001 | Password: Nepal@123 | MPIN: 1122
                 </p>
               </div>
             )}
@@ -206,9 +309,11 @@ export default function Checkout() {
             </h3>
 
             <div className="space-y-4 mb-6">
-              {cart.map((item) => (
+              {cart.map((item, index) => (
                 <div key={item._id} className="flex items-center gap-3">
-                  <div className="w-16 h-16 rounded-xl overflow-hidden bg-[#f5efe6]">
+                  
+
+<div className="w-16 h-16 rounded-xl overflow-hidden bg-[#f5efe6]">
                     <img
                       src={item.image}
                       alt={item.name}
@@ -232,7 +337,7 @@ export default function Checkout() {
             <div className="space-y-3 text-gray-700">
               <div className="flex justify-between">
                 <span>Subtotal</span>
-                <span>${subtotal.toFixed(2)}</span>
+                <span>Rs. {subtotal.toFixed(2)}</span>
               </div>
               <div className="flex justify-between">
                 <span>Shipping</span>
@@ -258,16 +363,16 @@ export default function Checkout() {
                 disabled={processing}
                 className="w-full px-4 py-3 bg-black text-white rounded-full hover:opacity-90 disabled:opacity-60"
               >
-                Place Order
+                {processing ? "Processing..." : "Place Order"}
               </button>
             ) : (
               <button
                 type="button"
-                onClick={handleKhaltiPayment}
+                onClick={handleEsewaPayment}
                 disabled={processing}
-                className="w-full px-4 py-3 bg-[#5C2D91] text-white rounded-full hover:opacity-90 disabled:opacity-60"
+                className="w-full px-4 py-3 bg-[#60bb46] text-white rounded-full hover:opacity-90 disabled:opacity-60"
               >
-                Khalti Demo
+                {processing ? "Redirecting..." : "Pay with eSewa"}
               </button>
             )}
           </div>

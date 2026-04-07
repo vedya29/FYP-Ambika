@@ -23,6 +23,8 @@ import About from "./pages/About";
 import Contact from "./pages/Contact";
 import Feedback from "./pages/Feedback";
 import NotFound from "./pages/NotFound";
+import PaymentSuccess from "./pages/PaymentSuccess";
+import PaymentFailure from "./pages/PaymentFailure";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 /* ================= USER DASHBOARD ================= */
@@ -78,6 +80,8 @@ function AppWrapper() {
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/feedback" element={<Feedback />} />
+        <Route path="/payment-success" element={<PaymentSuccess />} />
+        <Route path="/payment-failure" element={<PaymentFailure />} />  
 
         {/* AUTH */}
         <Route path="/login" element={<Login />} />
@@ -91,6 +95,7 @@ function AppWrapper() {
               <DashboardLayout />
             </ProtectedRoute>
           }
+          
         >
           <Route index element={<DashboardHome />} />
           <Route path="orders" element={<Orders />} />
