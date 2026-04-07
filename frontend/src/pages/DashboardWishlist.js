@@ -13,8 +13,7 @@ function DashboardWishlist() {
     }
 
     addToCart(product);
-    removeFromWishlist(product._id);
-    alert("Moved to cart 🛍️");
+    alert("Added to cart 🛒");
   };
 
   if (wishlist.length === 0) {
@@ -43,7 +42,6 @@ function DashboardWishlist() {
 
   return (
     <div className="space-y-8">
-      {/* Header */}
       <section className="bg-gradient-to-r from-[#f7e8ea] via-[#f8f4ee] to-[#efe3d3] rounded-3xl p-8 md:p-10 border border-[#eadfce] shadow-sm">
         <p className="text-sm uppercase tracking-[0.2em] text-[#9a6b75] mb-3">
           Saved with love
@@ -57,7 +55,6 @@ function DashboardWishlist() {
         </p>
       </section>
 
-      {/* Wishlist Grid */}
       <section>
         <div className="flex items-center justify-between mb-6">
           <div>
@@ -116,7 +113,7 @@ function DashboardWishlist() {
                     onClick={() => handleMoveToCart(product)}
                     className="w-full px-4 py-2 rounded-full bg-black text-white text-sm hover:opacity-90"
                   >
-                    Move to Cart 🛒
+                    Add to Cart 🛒
                   </button>
 
                   <button
@@ -135,7 +132,6 @@ function DashboardWishlist() {
         </div>
       </section>
 
-      {/* Cute bottom message */}
       <section className="bg-white rounded-3xl p-8 md:p-10 border border-[#eee4d8] shadow-sm text-center">
         <div className="text-4xl mb-3">🌷</div>
         <h3 className="text-2xl md:text-3xl font-serif text-[#2f2a25] mb-3">
