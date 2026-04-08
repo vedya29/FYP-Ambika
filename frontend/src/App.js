@@ -43,6 +43,7 @@ import AdminCategories from "./pages/AdminCategories";
 import AdminLogin from "./pages/AdminLogin";
 import AdminRegister from "./pages/AdminRegister";
 import AdminOrders from "./pages/AdminOrders";
+import AdminUsers from "./pages/AdminUsers";
 
 function AppWrapper() {
   const location = useLocation();
@@ -116,6 +117,8 @@ function AppWrapper() {
           <Route path="products" element={<AdminProducts />} />
           <Route path="orders" element={<AdminOrders />} />
           <Route path="categories" element={<AdminCategories />} />
+          <Route path="users" element={<AdminUsers />} />
+
         </Route>
 
         {/* 404 */}
