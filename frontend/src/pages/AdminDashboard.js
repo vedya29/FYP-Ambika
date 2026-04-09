@@ -1,4 +1,11 @@
 import React, { useEffect, useState } from "react";
+import {
+  Package,
+  ShoppingBag,
+  Users,
+  DollarSign,
+  ArrowUpRight,
+} from "lucide-react";
 
 export default function AdminDashboard() {
   const [productsCount, setProductsCount] = useState(0);
@@ -37,156 +44,143 @@ export default function AdminDashboard() {
   const recentOrders = orders.slice(0, 5);
 
   return (
-    <div style={styles.main}>
-      <h1 style={styles.pageTitle}>Dashboard Overview</h1>
+    <div className="space-y-8">
+      <section className="bg-gradient-to-r from-[#efe3d3] via-[#f8f4ee] to-[#f5e8dc] rounded-3xl p-8 md:p-10 border border-[#eadfce] shadow-sm">
+        <p className="text-sm uppercase tracking-[0.2em] text-[#8a6d4b] mb-3">
+          Store Overview
+        </p>
+        <h1 className="text-3xl md:text-5xl font-serif text-[#2f2a25] mb-4">
+          Admin Dashboard ✨
+        </h1>
+        <p className="text-gray-700 text-base md:text-lg max-w-3xl leading-7">
+          Track products, orders, users, and revenue from one premium dashboard.
+        </p>
+      </section>
 
-      <div style={styles.statsGrid}>
-        <StatCard title="Total Products" value={productsCount} />
-        <StatCard title="Total Orders" value={totalOrders} />
-        <StatCard title="Total Users" value={totalUsers} />
-        <StatCard title="Revenue" value={`$${revenue.toFixed(2)}`} highlight />
-      </div>
+      <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+        <StatCard
+          title="Total Products"
+          value={productsCount}
+          icon={<Package size={20} />}
+        />
+        <StatCard
+          title="Total Orders"
+          value={totalOrders}
+          icon={<ShoppingBag size={20} />}
+        />
+        <StatCard
+          title="Total Users"
+          value={totalUsers}
+          icon={<Users size={20} />}
+        />
+        <StatCard
+          title="Revenue"
+          value={`$${revenue.toFixed(2)}`}
+          icon={<DollarSign size={20} />}
+          highlight
+        />
+      </section>
 
-      <div style={styles.card}>
-        <h2 style={styles.sectionTitle}>Recent Orders</h2>
+      <section className="grid lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2 bg-white rounded-3xl p-6 md:p-8 border border-[#eee4d8] shadow-sm">
+          <div className="flex items-center justify-between mb-5">
+            <h2 className="text-2xl font-serif text-[#2f2a25]">
+              Recent Orders
+            </h2>
+            <span className="text-sm text-gray-500">Latest activity</span>
+          </div>
 
-        {recentOrders.length === 0 ? (
-          <p style={{ color: "#6B7280" }}>No orders available yet.</p>
-        ) : (
-          <table style={styles.table}>
-            <thead>
-              <tr style={styles.tableHeadRow}>
-                <th style={styles.th}>Order ID</th>
-                <th style={styles.th}>User</th>
-                <th style={styles.th}>Status</th>
-                <th style={styles.th}>Payment</th>
-                <th style={styles.th}>Total</th>
-              </tr>
-            </thead>
-            <tbody>
+          {recentOrders.length === 0 ? (
+            <p className="text-gray-500">No orders available yet.</p>
+          ) : (
+            <div className="space-y-4">
               {recentOrders.map((order) => (
-                <tr key={order.id} style={styles.tableRow}>
-                  <td style={styles.td}>#{order.id}</td>
-                  <td style={styles.td}>
-                    {order.customer?.fullName || "Unknown"}
-                  </td>
-                  <td
-                    style={{
-                      ...styles.td,
-                      color:
-                        order.status === "Delivered"
-                          ? "green"
-                          : order.status === "Shipped"
-                          ? "#2563EB"
-                          : order.status === "Cancelled"
-                          ? "#DC2626"
-                          : "#F97316",
-                      fontWeight: 600,
-                    }}
-                  >
-                    {order.status}
-                  </td>
-                  <td style={styles.td}>{order.paymentMethod}</td>
-                  <td style={styles.td}>${Number(order.totalAmount).toFixed(2)}</td>
-                </tr>
+                <div
+                  key={order.id}
+                  className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 border border-[#eee4d8] rounded-2xl p-4"
+                >
+                  <div>
+                    <p className="font-medium text-[#2f2a25]">
+                      #{order.id}
+                    </p>
+                    <p className="text-sm text-gray-500">
+                      {order.customer?.fullName || "Unknown Customer"}
+                    </p>
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-3">
+                    <span className="text-sm text-gray-600">
+                      ${Number(order.totalAmount).toFixed(2)}
+                    </span>
+                    <span className="px-3 py-1 rounded-full bg-[#f5e8dc] text-[#8a6d4b] text-xs font-medium">
+                      {order.status}
+                    </span>
+                  </div>
+                </div>
               ))}
-            </tbody>
-          </table>
-        )}
-      </div>
+            </div>
+          )}
+        </div>
+
+        <div className="bg-white rounded-3xl p-6 md:p-8 border border-[#eee4d8] shadow-sm">
+          <h2 className="text-2xl font-serif text-[#2f2a25] mb-5">
+            Quick Summary
+          </h2>
+
+          <div className="space-y-4">
+            <SummaryRow label="Orders Pending" value={countByStatus(orders, "Processing")} />
+            <SummaryRow label="Orders Shipped" value={countByStatus(orders, "Shipped")} />
+            <SummaryRow label="Orders Delivered" value={countByStatus(orders, "Delivered")} />
+            <SummaryRow label="Orders Cancelled" value={countByStatus(orders, "Cancelled")} />
+          </div>
+
+          <div className="mt-6 rounded-2xl bg-[#f8f4ee] border border-[#eee4d8] p-4">
+            <div className="flex items-center gap-2 text-[#2f2a25] font-medium mb-2">
+              <ArrowUpRight size={16} />
+              Store Insight
+            </div>
+            <p className="text-sm text-gray-600 leading-6">
+              Your admin panel now tracks real products, customer orders, and
+              revenue, giving your project a more complete e-commerce workflow.
+            </p>
+          </div>
+        </div>
+      </section>
     </div>
   );
 }
 
-function StatCard({ title, value, highlight }) {
+function countByStatus(orders, status) {
+  return orders.filter((order) => order.status === status).length;
+}
+
+function StatCard({ title, value, icon, highlight }) {
   return (
     <div
-      style={{
-        ...styles.statCard,
-        backgroundColor: highlight ? "#F97316" : "#fff",
-        color: highlight ? "#fff" : "#111827",
-      }}
+      className={`rounded-3xl p-6 border shadow-sm ${
+        highlight
+          ? "bg-[#c88a52] text-white border-[#c88a52]"
+          : "bg-white text-[#2f2a25] border-[#eee4d8]"
+      }`}
     >
-      <p style={styles.statTitle}>{title}</p>
-      <p style={styles.statValue}>{value}</p>
+      <div className="flex items-center justify-between mb-4">
+        <div className={highlight ? "text-white/90" : "text-[#8a6d4b]"}>
+          {icon}
+        </div>
+      </div>
+      <p className={highlight ? "text-white/80 text-sm" : "text-gray-500 text-sm"}>
+        {title}
+      </p>
+      <h3 className="text-3xl font-semibold mt-2">{value}</h3>
     </div>
   );
 }
 
-const styles = {
-  main: {
-    padding: "40px",
-    overflowY: "auto",
-    backgroundColor: "#FFF7ED",
-    fontFamily: "Inter, sans-serif",
-    minHeight: "100vh",
-  },
-
-  pageTitle: {
-    fontFamily: "'Playfair Display', serif",
-    fontSize: "32px",
-    marginBottom: "32px",
-    color: "#1F2937",
-  },
-
-  statsGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-    gap: "20px",
-    marginBottom: "40px",
-  },
-
-  statCard: {
-    padding: "24px",
-    borderRadius: "20px",
-    boxShadow: "0 10px 25px rgba(0,0,0,0.08)",
-  },
-
-  statTitle: {
-    fontSize: "14px",
-    opacity: 0.8,
-  },
-
-  statValue: {
-    fontSize: "26px",
-    fontWeight: 700,
-    marginTop: "8px",
-  },
-
-  card: {
-    backgroundColor: "#fff",
-    borderRadius: "20px",
-    padding: "24px",
-    boxShadow: "0 10px 25px rgba(0,0,0,0.08)",
-  },
-
-  sectionTitle: {
-    fontFamily: "'Playfair Display', serif",
-    fontSize: "22px",
-    marginBottom: "16px",
-  },
-
-  table: {
-    width: "100%",
-    borderCollapse: "collapse",
-  },
-
-  tableHeadRow: {
-    textAlign: "left",
-    borderBottom: "2px solid #E5E7EB",
-    color: "#6B7280",
-  },
-
-  tableRow: {
-    borderBottom: "1px solid #E5E7EB",
-    height: "56px",
-  },
-
-  th: {
-    padding: "12px 8px",
-  },
-
-  td: {
-    padding: "12px 8px",
-  },
-};
+function SummaryRow({ label, value }) {
+  return (
+    <div className="flex items-center justify-between border-b border-[#f1e7dc] pb-3">
+      <span className="text-gray-600">{label}</span>
+      <span className="font-semibold text-[#2f2a25]">{value}</span>
+    </div>
+  );
+}

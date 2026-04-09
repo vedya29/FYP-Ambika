@@ -1,12 +1,11 @@
 import React from "react";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import {
-  Home,
+  LayoutDashboard,
   Package,
   ShoppingCart,
   Users,
-  BarChart3,
-  Settings,
+  FolderTree,
   LogOut,
 } from "lucide-react";
 
@@ -14,9 +13,13 @@ export default function AdminLayout() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const goHome = () => {
-    navigate("/admin/dashboard");
-  };
+  const menu = [
+    { label: "Dashboard", icon: LayoutDashboard, path: "/admin/dashboard" },
+    { label: "Products", icon: Package, path: "/admin/products" },
+    { label: "Orders", icon: ShoppingCart, path: "/admin/orders" },
+    { label: "Users", icon: Users, path: "/admin/users" },
+    { label: "Categories", icon: FolderTree, path: "/admin/categories" },
+  ];
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -25,93 +28,55 @@ export default function AdminLayout() {
     navigate("/admin/login");
   };
 
-  const menu = [
-    { label: "Dashboard", icon: Home, path: "/admin/dashboard" },
-    { label: "Products", icon: Package, path: "/admin/products" },
-    { label: "Orders", icon: ShoppingCart, path: "/admin/orders" },
-    { label: "Users", icon: Users, path: "/admin/users" },
-    { label: "Reports", icon: BarChart3, path: "/admin/reports" },
-    { label: "Settings", icon: Settings, path: "/admin/settings" },
-  ];
-
   return (
-    <div style={{ display: "flex", minHeight: "100vh" }}>
-      <aside style={styles.sidebar}>
-        <div style={styles.brand} onClick={goHome}>
-          AMBIKA <span style={{ color: "#F97316" }}>Admin</span>
+    <div className="min-h-screen flex bg-[#f8f4ee]">
+      <aside className="w-[280px] bg-[#1f1a17] text-white px-5 py-6 flex flex-col shadow-2xl">
+        <div
+          onClick={() => navigate("/admin/dashboard")}
+          className="cursor-pointer mb-8"
+        >
+          <h1 className="text-3xl font-serif tracking-wide">Ambika</h1>
+          <p className="text-sm text-[#d4b08a] mt-1">Admin Panel</p>
         </div>
 
-        <div style={styles.divider} />
+        <div className="h-px bg-white/10 mb-6" />
 
-        {menu.map((item) => {
-          const active = location.pathname === item.path;
-          const Icon = item.icon;
+        <div className="space-y-2">
+          {menu.map((item) => {
+            const Icon = item.icon;
+            const active = location.pathname === item.path;
 
-          return (
-            <div
-              key={item.label}
-              onClick={() => navigate(item.path)}
-              style={{
-                ...styles.menuItem,
-                ...(active ? styles.activeItem : {}),
-              }}
-            >
-              <Icon size={20} />
-              {item.label}
-            </div>
-          );
-        })}
+            return (
+              <button
+                key={item.label}
+                onClick={() => navigate(item.path)}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-left transition ${
+                  active
+                    ? "bg-[#c88a52] text-white shadow-md"
+                    : "text-[#f5ede5] hover:bg-white/10"
+                }`}
+              >
+                <Icon size={18} />
+                <span className="text-sm font-medium">{item.label}</span>
+              </button>
+            );
+          })}
+        </div>
 
-        <div style={styles.logout} onClick={handleLogout}>
-          <LogOut size={20} /> Logout
+        <div className="mt-auto pt-6">
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-left text-[#f5ede5] hover:bg-white/10 transition"
+          >
+            <LogOut size={18} />
+            <span className="text-sm font-medium">Logout</span>
+          </button>
         </div>
       </aside>
 
-      <main style={{ flex: 1, padding: "24px" }}>
+      <main className="flex-1 p-6 md:p-8 overflow-y-auto">
         <Outlet />
       </main>
     </div>
   );
 }
-
-const styles = {
-  sidebar: {
-    width: "260px",
-    background: "linear-gradient(180deg,#020617,#020617)",
-    color: "#fff",
-    padding: "24px 16px",
-    display: "flex",
-    flexDirection: "column",
-  },
-  brand: {
-    fontSize: "28px",
-    fontWeight: "700",
-    marginBottom: "16px",
-    cursor: "pointer",
-  },
-  divider: {
-    height: "1px",
-    background: "#334155",
-    marginBottom: "24px",
-  },
-  menuItem: {
-    display: "flex",
-    alignItems: "center",
-    gap: "14px",
-    padding: "14px 16px",
-    borderRadius: "12px",
-    cursor: "pointer",
-    marginBottom: "10px",
-  },
-  activeItem: {
-    background: "#F97316",
-    color: "#fff",
-  },
-  logout: {
-    marginTop: "auto",
-    color: "#F97316",
-    display: "flex",
-    gap: "12px",
-    cursor: "pointer",
-  },
-};
