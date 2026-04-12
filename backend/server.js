@@ -16,7 +16,7 @@ const Admin = require("./models/Admin");
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// ✅ USE ENV VARIABLES (instead of hardcoding)
+//  USE ENV VARIABLES (instead of hardcoding)
 const MONGO_URI = process.env.MONGO_URI;
 const JWT_SECRET = process.env.JWT_SECRET;
 
