@@ -238,7 +238,7 @@ export default function DashboardHome() {
           )}
         </section>
 
-        <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="bg-white rounded-3xl p-6 border border-[#eee4d8] shadow-sm">
             <p className="text-sm text-gray-500 mb-2">Wishlist Items</p>
             <p className="text-4xl font-semibold text-[#2f2a25]">❤️</p>
@@ -253,7 +253,7 @@ export default function DashboardHome() {
             <p className="text-sm text-gray-500 mb-2">Account Status</p>
             <p className="text-4xl font-semibold text-[#2f2a25]">Active</p>
           </div>
-        </section>
+        </section> */}
       </div>
     </div>
   );
