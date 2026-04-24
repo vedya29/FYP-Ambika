@@ -139,10 +139,6 @@ export default function AdminDashboard() {
               <ArrowUpRight size={16} />
               Store Insight
             </div>
-            <p className="text-sm text-gray-600 leading-6">
-              Your admin panel now tracks real products, customer orders, and
-              revenue, giving your project a more complete e-commerce workflow.
-            </p>
           </div>
         </div>
       </section>
