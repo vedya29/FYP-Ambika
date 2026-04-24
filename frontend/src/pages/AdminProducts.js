@@ -1,17 +1,21 @@
 import React, { useEffect, useState } from "react";
-import { Plus, Trash2, Package2 } from "lucide-react";
+import { Plus, Trash2, Package2, Edit3, X } from "lucide-react";
 
 export default function AdminProducts() {
   const [products, setProducts] = useState([]);
   const [message, setMessage] = useState("");
-  const [form, setForm] = useState({
+  const [editingId, setEditingId] = useState(null);
+
+  const emptyForm = {
     name: "",
     price: "",
     image: "",
     category: "",
     gender: "",
     description: "",
-  });
+  };
+
+  const [form, setForm] = useState(emptyForm);
 
   useEffect(() => {
     fetchProducts();
@@ -34,7 +38,13 @@ export default function AdminProducts() {
     }));
   };
 
-  const handleAddProduct = async (e) => {
+  const resetForm = () => {
+    setForm(emptyForm);
+    setEditingId(null);
+    setMessage("");
+  };
+
+  const handleSubmitProduct = async (e) => {
     e.preventDefault();
     setMessage("");
 
@@ -51,8 +61,14 @@ export default function AdminProducts() {
     }
 
     try {
-      const res = await fetch("http://localhost:5000/api/products", {
-        method: "POST",
+      const url = editingId
+        ? `http://localhost:5000/api/products/${editingId}`
+        : "http://localhost:5000/api/products";
+
+      const method = editingId ? "PUT" : "POST";
+
+      const res = await fetch(url, {
+        method,
         headers: {
           "Content-Type": "application/json",
         },
@@ -65,24 +81,36 @@ export default function AdminProducts() {
       const data = await res.json();
 
       if (!res.ok) {
-        setMessage(data.message || "Failed to add product.");
+        setMessage(data.message || "Failed to save product.");
         return;
       }
 
-      setMessage("Product added successfully ✅");
-      setForm({
-        name: "",
-        price: "",
-        image: "",
-        category: "",
-        gender: "",
-        description: "",
-      });
+      setMessage(
+        editingId
+          ? "Product updated successfully ✅"
+          : "Product added successfully ✅"
+      );
+
+      resetForm();
       fetchProducts();
     } catch (error) {
-      console.error("Add product error:", error);
-      setMessage("Server error while adding product.");
+      console.error("Save product error:", error);
+      setMessage("Server error while saving product.");
     }
+  };
+
+  const handleEdit = (product) => {
+    setEditingId(product._id);
+    setForm({
+      name: product.name || "",
+      price: product.price || "",
+      image: product.image || "",
+      category: product.category || "",
+      gender: product.gender || "",
+      description: product.description || "",
+    });
+
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handleDelete = async (id) => {
@@ -119,24 +147,37 @@ export default function AdminProducts() {
           Manage Products 🧵
         </h2>
         <p className="text-gray-700 text-base md:text-lg leading-7 max-w-3xl">
-          Add new products, organize categories, and manage your pashmina
-          collection from one place.
+          Add, edit, delete, and organize your pashmina collection from one place.
         </p>
       </section>
 
       <section className="bg-white rounded-3xl p-6 md:p-8 border border-[#eee4d8] shadow-sm">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="w-11 h-11 rounded-2xl bg-[#f5e8dc] flex items-center justify-center text-[#8a6d4b]">
-            <Plus size={20} />
+        <div className="flex items-center justify-between gap-3 mb-6">
+          <div className="flex items-center gap-3">
+            <div className="w-11 h-11 rounded-2xl bg-[#f5e8dc] flex items-center justify-center text-[#8a6d4b]">
+              {editingId ? <Edit3 size={20} /> : <Plus size={20} />}
+            </div>
+            <div>
+              <h3 className="text-2xl font-serif text-[#2f2a25]">
+                {editingId ? "Edit Product" : "Add New Product"}
+              </h3>
+              <p className="text-sm text-gray-500">
+                {editingId
+                  ? "Update the product details below"
+                  : "Fill in the product details below"}
+              </p>
+            </div>
           </div>
-          <div>
-            <h3 className="text-2xl font-serif text-[#2f2a25]">
-              Add New Product
-            </h3>
-            <p className="text-sm text-gray-500">
-              Fill in the product details below
-            </p>
-          </div>
+
+          {editingId && (
+            <button
+              onClick={resetForm}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-[#ddd2c5] hover:bg-[#faf7f2]"
+            >
+              <X size={16} />
+              Cancel Edit
+            </button>
+          )}
         </div>
 
         {message && (
@@ -145,7 +186,7 @@ export default function AdminProducts() {
           </div>
         )}
 
-        <form onSubmit={handleAddProduct} className="grid md:grid-cols-2 gap-4">
+        <form onSubmit={handleSubmitProduct} className="grid md:grid-cols-2 gap-4">
           <input
             type="text"
             name="name"
@@ -212,8 +253,8 @@ export default function AdminProducts() {
             type="submit"
             className="md:col-span-2 inline-flex items-center justify-center gap-2 px-6 py-3 bg-black text-white rounded-full hover:opacity-90"
           >
-            <Plus size={18} />
-            Add Product
+            {editingId ? <Edit3 size={18} /> : <Plus size={18} />}
+            {editingId ? "Update Product" : "Add Product"}
           </button>
         </form>
       </section>
@@ -270,12 +311,23 @@ export default function AdminProducts() {
                       ${product.price}
                     </span>
 
-                    <button
-                      onClick={() => handleDelete(product._id)}
-                      className="p-2 rounded-xl hover:bg-red-100 text-red-500"
-                    >
-                      <Trash2 size={16} />
-                    </button>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => handleEdit(product)}
+                        className="p-2 rounded-xl hover:bg-[#f5e8dc] text-[#8a6d4b]"
+                        title="Edit product"
+                      >
+                        <Edit3 size={16} />
+                      </button>
+
+                      <button
+                        onClick={() => handleDelete(product._id)}
+                        className="p-2 rounded-xl hover:bg-red-100 text-red-500"
+                        title="Delete product"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
