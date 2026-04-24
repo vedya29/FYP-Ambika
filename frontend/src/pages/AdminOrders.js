@@ -27,7 +27,7 @@ function AdminOrders() {
   const filteredOrders = useMemo(() => {
     return orders.filter((order) => {
       const matchesSearch =
-        order.id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        String(order.id || "").toLowerCase().includes(searchTerm.toLowerCase())||
         order.customer?.fullName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         order.customer?.email?.toLowerCase().includes(searchTerm.toLowerCase());
 
