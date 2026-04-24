@@ -24,18 +24,19 @@ export default function Checkout() {
   const textOnlyRegex = /^[A-Za-z\s]+$/;
 
   const generateOrderId = () => {
-    const existingOrders = JSON.parse(localStorage.getItem("orders")) || [];
-    const numericIds = existingOrders
-      .map((order) => {
-        const raw = String(order.id || "");
-        const match = raw.match(/(\d+)$/);
-        return match ? Number(match[1]) : null;
-      })
-      .filter((id) => id !== null);
+  const existingOrders = JSON.parse(localStorage.getItem("orders")) || [];
 
-    const maxId = numericIds.length ? Math.max(...numericIds) : 1000;
-    return maxId + 1;
-  };
+  const numericIds = existingOrders
+    .map((order) => {
+      const match = String(order.id).match(/ORD-(\d+)/);
+      return match ? Number(match[1]) : null;
+    })
+    .filter(Boolean);
+
+  const nextId = numericIds.length ? Math.max(...numericIds) + 1 : 1;
+
+  return `ORD-${String(nextId).padStart(3, "0")}`;
+};
 
   const validateForm = () => {
     const newErrors = {};
