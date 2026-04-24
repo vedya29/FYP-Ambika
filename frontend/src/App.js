@@ -39,7 +39,7 @@ import DashboardSettings from "./pages/DashboardSettings";
 import AdminLayout from "./layout/AdminLayout";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminProducts from "./pages/AdminProducts";
-import AdminCategories from "./pages/AdminCategories";
+import AdminSettings from "./pages/AdminSettings";
 import AdminLogin from "./pages/AdminLogin";
 import AdminRegister from "./pages/AdminRegister";
 import AdminOrders from "./pages/AdminOrders";
@@ -116,7 +116,7 @@ function AppWrapper() {
           <Route path="dashboard" element={<AdminDashboard />} />
           <Route path="products" element={<AdminProducts />} />
           <Route path="orders" element={<AdminOrders />} />
-          <Route path="categories" element={<AdminCategories />} />
+          <Route path="settings" element={<AdminSettings />} />
           <Route path="users" element={<AdminUsers />} />
 
         </Route>

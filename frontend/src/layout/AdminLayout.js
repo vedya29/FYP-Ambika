@@ -6,6 +6,7 @@ import {
   ShoppingCart,
   Users,
   FolderTree,
+  Settings,
   LogOut,
 } from "lucide-react";
 
@@ -18,7 +19,7 @@ export default function AdminLayout() {
     { label: "Products", icon: Package, path: "/admin/products" },
     { label: "Orders", icon: ShoppingCart, path: "/admin/orders" },
     { label: "Users", icon: Users, path: "/admin/users" },
-    { label: "Categories", icon: FolderTree, path: "/admin/categories" },
+    { label: "Settings", icon: Settings, path: "/admin/settings" },,
   ];
 
   const handleLogout = () => {
