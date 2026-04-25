@@ -24,12 +24,23 @@ function AdminOrders() {
     localStorage.setItem("orders", JSON.stringify(updatedOrders));
   };
 
+  const updatePaymentStatus = (id, newPaymentStatus) => {
+    const updatedOrders = orders.map((order) =>
+      order.id === id ? { ...order, paymentStatus: newPaymentStatus } : order
+    );
+
+    setOrders(updatedOrders);
+    localStorage.setItem("orders", JSON.stringify(updatedOrders));
+  };
+
   const filteredOrders = useMemo(() => {
     return orders.filter((order) => {
+      const search = searchTerm.toLowerCase();
+
       const matchesSearch =
-        String(order.id || "").toLowerCase().includes(searchTerm.toLowerCase())||
-        order.customer?.fullName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        order.customer?.email?.toLowerCase().includes(searchTerm.toLowerCase());
+        String(order.id || "").toLowerCase().includes(search) ||
+        (order.customer?.fullName || "").toLowerCase().includes(search) ||
+        (order.customer?.email || "").toLowerCase().includes(search);
 
       const matchesStatus =
         statusFilter === "All" ? true : order.status === statusFilter;
@@ -149,10 +160,20 @@ function AdminOrders() {
 
                 <div className="flex flex-wrap items-center gap-3">
                   <StatusBadge status={order.paymentMethod} type="paymentMethod" />
-                  <StatusBadge
-                    status={order.paymentStatus || "Pending"}
-                    type="paymentStatus"
-                  />
+
+                  <select
+                    value={order.paymentStatus || "Pending"}
+                    onChange={(e) =>
+                      updatePaymentStatus(order.id, e.target.value)
+                    }
+                    className="border border-[#ddd2c5] rounded-full px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-[#d8b89c]"
+                  >
+                    <option value="Pending">Pending</option>
+                    <option value="Paid">Paid</option>
+                    <option value="Pending Verification">
+                      Pending Verification
+                    </option>
+                  </select>
 
                   <select
                     value={order.status}
@@ -207,6 +228,12 @@ function AdminOrders() {
                       Payment:{" "}
                       <span className="font-medium text-[#2f2a25]">
                         {order.paymentMethod}
+                      </span>
+                    </p>
+                    <p>
+                      Payment Status:{" "}
+                      <span className="font-medium text-[#2f2a25]">
+                        {order.paymentStatus || "Pending"}
                       </span>
                     </p>
                   </div>
@@ -269,7 +296,9 @@ function AdminOrders() {
 function MiniStatCard({ title, value, icon, color }) {
   return (
     <div className="bg-white rounded-3xl p-6 border border-[#eee4d8] shadow-sm">
-      <div className={`w-10 h-10 rounded-2xl flex items-center justify-center mb-4 ${color}`}>
+      <div
+        className={`w-10 h-10 rounded-2xl flex items-center justify-center mb-4 ${color}`}
+      >
         {icon}
       </div>
       <p className="text-sm text-gray-500">{title}</p>
